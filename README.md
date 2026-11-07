@@ -1,6 +1,6 @@
 # End-to-End Data Management Pipeline for a Recipe Recommender (Food.com)
 
-**Yash Sharma · Roll No. 2025AG05572** · DM4ML Assignment 2
+**Yash Sharma · Roll No. 2025AG05572** · DM4ML Assignment 2 · <https://github.com/2025ag05572-gif/bitsdm4mlas2>
 
 This repo is a reproducible pipeline that takes the raw Food.com recipe/review data
 from Kaggle all the way to evaluated recommendation models:
