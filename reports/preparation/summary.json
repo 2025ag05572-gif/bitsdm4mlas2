@@ -1,0 +1,32 @@
+{
+  "recipes_missing_name_filled": 1,
+  "recipes_minutes_imputed": 1164,
+  "recipes_calories_imputed": 125,
+  "recipes_missing_description": 4982,
+  "recipes_without_category": 13763,
+  "interactions_zero_rating_to_missing": 60827,
+  "interactions_dropped_unknown_recipe": 0,
+  "interactions_repeat_pairs_collapsed": 0,
+  "users_dropped_no_valid_activity": 48,
+  "recipes": 231637,
+  "interactions": 1131121,
+  "users": 236671,
+  "interactions_rated": 1070294,
+  "date_min": "2000-01-25T00:00:00",
+  "date_max": "2018-12-20T00:00:00",
+  "category_distribution": {
+    "main-dish": 71747,
+    "desserts": 43203,
+    "side-dishes": 23293,
+    "appetizers": 15839,
+    "other": 13763,
+    "breakfast": 10834,
+    "breads": 10394,
+    "beverages": 10070,
+    "salads": 9720,
+    "soups-stews": 8603,
+    "condiments-etc": 7986,
+    "lunch": 4086,
+    "snacks": 2099
+  }
+}

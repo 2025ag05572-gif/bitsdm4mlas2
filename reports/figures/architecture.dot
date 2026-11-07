@@ -1,0 +1,42 @@
+digraph pipeline {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=12, bgcolor="#fcfcfb", nodesep=0.3, ranksep=0.42, pad=0.3, newrank=true,
+         label="Food.com recommendation pipeline - every stage is a Prefect task (dags/recommendation_pipeline.py)\n ", labelloc=t, fontcolor="#0b0b0b"];
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#52514e", fillcolor="#ffffff", fontcolor="#0b0b0b", penwidth=1.2, width=2.45];
+  edge  [color="#52514e", arrowsize=0.7, fontname="Helvetica", fontsize=8.5, fontcolor="#52514e"];
+
+  src      [label="Kaggle: Food.com\nRAW_recipes.csv (231K)\nRAW_interactions.csv (1.13M)", shape=cylinder, fillcolor="#cde2fb"];
+  ingest   [label="1. Ingestion\nread CSVs as strings (zip ok)\nlineage cols, user dimension\nmanifest with SHA-256"];
+  validate [label="2. Validation (Pandera)\ntypes, nulls, ranges, dates,\nduplicates, referential integrity\nquality gate (min pass rate)"];
+  prepare  [label="3. Preparation\nnormalise text, impute outliers,\nrating 0 -> missing, collapse\nrepeat reviews, category/cuisine"];
+  transform[label="4. Transformation\nglobal time split, train k-core,\nuser activity / item popularity,\nsparse user x item matrices"];
+
+  features [label="5. Feature store\nregistry -> user / item / interaction\nfeatures + TF-IDF item content\nviews: training | serving"];
+  train    [label="6. Training (+ MLflow)\npopularity | item-kNN | content\nbiased MF | hybrid"];
+  evaluate [label="7. Evaluation\nP / R / NDCG / HitRate @5,10\ncoverage, diversity, novelty\nRMSE / MAE, user segments"];
+  serve    [label="Serving CLI (src/serving/recommend.py)\nmodels/*.joblib + serving feature view\ncold-start popularity fallback", fillcolor="#f3f2ee"];
+
+  raw      [label="data/raw/\n*.parquet, manifest", shape=folder, fillcolor="#f3f2ee"];
+  errors   [label="data/errors/ *_errors.csv\nreports/validation/", shape=folder, fillcolor="#fde3d7"];
+  proc     [label="data/processed/\nclean/, train, test, *.npz", shape=folder, fillcolor="#f3f2ee"];
+  fstore   [label="data/features/\ntraining/  serving/", shape=folder, fillcolor="#f3f2ee"];
+  mlflow   [label="MLflow tracking\nmlflow.db + mlruns/", shape=cylinder, fillcolor="#cde2fb"];
+  reports  [label="reports/\nresults.md, charts,\nfeature_catalog.md", shape=folder, fillcolor="#f3f2ee"];
+
+  {rank=same; src; ingest; validate; prepare; transform;}
+  {rank=same; raw; errors; proc;}
+  {rank=same; features; train; evaluate; serve;}
+  {rank=same; fstore; mlflow; reports;}
+
+  src -> ingest -> validate -> prepare -> transform;
+  transform -> features [constraint=false];
+  features -> train -> evaluate;
+  ingest -> raw [style=dashed, arrowhead=none];
+  validate -> errors [style=dashed, label=" invalid rows"];
+  transform -> proc [style=dashed, arrowhead=none];
+  raw -> features [style=invis];
+  features -> fstore [style=dashed, arrowhead=none];
+  train -> mlflow [style=dashed];
+  evaluate -> mlflow [style=dashed, label=" metrics"];
+  evaluate -> reports [style=dashed];
+  evaluate -> serve [style=invis];
+}

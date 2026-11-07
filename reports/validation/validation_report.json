@@ -1,0 +1,542 @@
+{
+  "stage": "validation",
+  "generated_at": "2026-11-07T16:02:48Z",
+  "tables": {
+    "recipes": {
+      "rows_in": 231637,
+      "rows_valid": 231637,
+      "rows_quarantined": 0,
+      "pass_rate": 1.0,
+      "rows_with_warnings": 5599,
+      "rules": [
+        {
+          "rule": "type_error:id",
+          "severity": "error",
+          "description": "id is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:minutes",
+          "severity": "error",
+          "description": "minutes is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:contributor_id",
+          "severity": "error",
+          "description": "contributor_id is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:submitted",
+          "severity": "error",
+          "description": "submitted is present but cannot be parsed as date",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:n_steps",
+          "severity": "error",
+          "description": "n_steps is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:n_ingredients",
+          "severity": "error",
+          "description": "n_ingredients is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "malformed_list:tags",
+          "severity": "error",
+          "description": "tags is not a valid list literal",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "malformed_list:ingredients",
+          "severity": "error",
+          "description": "ingredients is not a valid list literal",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "malformed_list:nutrition",
+          "severity": "error",
+          "description": "nutrition is not a valid list literal of 7 numbers",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:id",
+          "severity": "error",
+          "description": "id is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "positive_id:id",
+          "severity": "error",
+          "description": "id must satisfy greater_than(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:minutes",
+          "severity": "error",
+          "description": "minutes is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "non_negative_minutes:minutes",
+          "severity": "error",
+          "description": "minutes must satisfy greater_than_or_equal_to(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:contributor_id",
+          "severity": "error",
+          "description": "contributor_id is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "positive_id:contributor_id",
+          "severity": "error",
+          "description": "contributor_id must satisfy greater_than(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:submitted",
+          "severity": "error",
+          "description": "submitted is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "date_after_min:submitted",
+          "severity": "error",
+          "description": "submitted must satisfy greater_than_or_equal_to(1999-01-01 00:00:00)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "date_before_max:submitted",
+          "severity": "error",
+          "description": "submitted must satisfy less_than_or_equal_to(2018-12-31 00:00:00)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:n_steps",
+          "severity": "error",
+          "description": "n_steps is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "non_negative_n_steps:n_steps",
+          "severity": "error",
+          "description": "n_steps must satisfy greater_than_or_equal_to(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:n_ingredients",
+          "severity": "error",
+          "description": "n_ingredients is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "at_least_one_ingredient:n_ingredients",
+          "severity": "error",
+          "description": "n_ingredients must satisfy greater_than_or_equal_to(1)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:tags",
+          "severity": "error",
+          "description": "tags is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:ingredients",
+          "severity": "error",
+          "description": "ingredients is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:steps",
+          "severity": "error",
+          "description": "steps is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:nutrition",
+          "severity": "error",
+          "description": "nutrition is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "duplicate_row",
+          "severity": "error",
+          "description": "exact duplicate of an earlier row",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "duplicate_key:id",
+          "severity": "error",
+          "description": "recipe id already used by an earlier row",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "missing_description",
+          "severity": "warning",
+          "description": "description is empty",
+          "rows": 4979,
+          "pct_of_rows": 2.1494838907428435
+        },
+        {
+          "rule": "zero_minutes",
+          "severity": "warning",
+          "description": "minutes == 0 (treated as unknown and imputed)",
+          "rows": 1094,
+          "pct_of_rows": 0.47229069621865244
+        },
+        {
+          "rule": "extreme_calories",
+          "severity": "warning",
+          "description": "calories > validation.max_calories",
+          "rows": 125,
+          "pct_of_rows": 0.05396374499756084
+        },
+        {
+          "rule": "implausible_minutes",
+          "severity": "warning",
+          "description": "minutes > validation.max_recipe_minutes (30 days)",
+          "rows": 70,
+          "pct_of_rows": 0.03021969719863407
+        },
+        {
+          "rule": "missing_name",
+          "severity": "warning",
+          "description": "recipe name is empty",
+          "rows": 1,
+          "pct_of_rows": 0.0004317099599804867
+        },
+        {
+          "rule": "zero_steps",
+          "severity": "warning",
+          "description": "n_steps == 0",
+          "rows": 1,
+          "pct_of_rows": 0.0004317099599804867
+        },
+        {
+          "rule": "ingredient_count_mismatch",
+          "severity": "warning",
+          "description": "len(ingredients) != n_ingredients",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "empty_tags",
+          "severity": "warning",
+          "description": "tag list is empty",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        }
+      ]
+    },
+    "users": {
+      "rows_in": 236719,
+      "rows_valid": 236719,
+      "rows_quarantined": 0,
+      "pass_rate": 1.0,
+      "rows_with_warnings": 0,
+      "rules": [
+        {
+          "rule": "type_error:user_id",
+          "severity": "error",
+          "description": "user_id is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:member_since",
+          "severity": "error",
+          "description": "member_since is present but cannot be parsed as date",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:n_reviews",
+          "severity": "error",
+          "description": "n_reviews is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:n_recipes_contributed",
+          "severity": "error",
+          "description": "n_recipes_contributed is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:is_reviewer",
+          "severity": "error",
+          "description": "is_reviewer is present but cannot be parsed as bool",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:is_contributor",
+          "severity": "error",
+          "description": "is_contributor is present but cannot be parsed as bool",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:first_review_date",
+          "severity": "error",
+          "description": "first_review_date is present but cannot be parsed as date",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:first_contribution_date",
+          "severity": "error",
+          "description": "first_contribution_date is present but cannot be parsed as date",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:user_id",
+          "severity": "error",
+          "description": "user_id is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "unique:user_id",
+          "severity": "error",
+          "description": "user_id must be unique",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "positive_id:user_id",
+          "severity": "error",
+          "description": "user_id must satisfy greater_than(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:member_since",
+          "severity": "error",
+          "description": "member_since is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:n_reviews",
+          "severity": "error",
+          "description": "n_reviews is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "non_negative:n_reviews",
+          "severity": "error",
+          "description": "n_reviews must satisfy greater_than_or_equal_to(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:n_recipes_contributed",
+          "severity": "error",
+          "description": "n_recipes_contributed is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "non_negative:n_recipes_contributed",
+          "severity": "error",
+          "description": "n_recipes_contributed must satisfy greater_than_or_equal_to(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        }
+      ]
+    },
+    "interactions": {
+      "rows_in": 1132367,
+      "rows_valid": 1131121,
+      "rows_quarantined": 1246,
+      "pass_rate": 0.9988996500251244,
+      "rows_with_warnings": 61012,
+      "rules": [
+        {
+          "rule": "invalid_timestamp:review_before_recipe_submitted",
+          "severity": "error",
+          "description": "review date is earlier than the recipe's submitted date (impossible ordering)",
+          "rows": 1246,
+          "pct_of_rows": 0.11003499748756367
+        },
+        {
+          "rule": "type_error:user_id",
+          "severity": "error",
+          "description": "user_id is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:recipe_id",
+          "severity": "error",
+          "description": "recipe_id is present but cannot be parsed as int",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:date",
+          "severity": "error",
+          "description": "date is present but cannot be parsed as date",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "type_error:rating",
+          "severity": "error",
+          "description": "rating is present but cannot be parsed as float",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:user_id",
+          "severity": "error",
+          "description": "user_id is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "positive_id:user_id",
+          "severity": "error",
+          "description": "user_id must satisfy greater_than(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:recipe_id",
+          "severity": "error",
+          "description": "recipe_id is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "positive_id:recipe_id",
+          "severity": "error",
+          "description": "recipe_id must satisfy greater_than(0)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:date",
+          "severity": "error",
+          "description": "date is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "date_after_min:date",
+          "severity": "error",
+          "description": "date must satisfy greater_than_or_equal_to(1999-01-01 00:00:00)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "date_before_max:date",
+          "severity": "error",
+          "description": "date must satisfy less_than_or_equal_to(2018-12-31 00:00:00)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "not_null:rating",
+          "severity": "error",
+          "description": "rating is missing",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "rating_in_allowed_set:rating",
+          "severity": "error",
+          "description": "rating must satisfy isin([0, 1, 2, 3, 4, 5])",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "duplicate_row",
+          "severity": "error",
+          "description": "exact duplicate of an earlier row (user, recipe, date, rating, review)",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "referential_integrity:recipe_id",
+          "severity": "error",
+          "description": "recipe_id not found among valid recipes",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "referential_integrity:user_id",
+          "severity": "error",
+          "description": "user_id not found among valid users",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        },
+        {
+          "rule": "rating_zero_no_stars",
+          "severity": "warning",
+          "description": "rating == 0, i.e. review written without a star rating",
+          "rows": 60847,
+          "pct_of_rows": 5.373434584370615
+        },
+        {
+          "rule": "missing_review",
+          "severity": "warning",
+          "description": "review text is empty",
+          "rows": 165,
+          "pct_of_rows": 0.014571247660873197
+        },
+        {
+          "rule": "repeat_user_recipe_pair",
+          "severity": "warning",
+          "description": "user reviewed the same recipe more than once",
+          "rows": 0,
+          "pct_of_rows": 0.0
+        }
+      ]
+    }
+  },
+  "quality_gate": {
+    "min_pass_rate": 0.95,
+    "passed": true,
+    "failing_tables": {}
+  }
+}

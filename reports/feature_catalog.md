@@ -1,0 +1,44 @@
+# Feature Catalog
+
+Generated 2026-11-07T16:03:34Z from the **training** view (as_of = 2014-02-26).
+Entity keys: `user_id` (user), `recipe_id` (item), `(user_id, recipe_id, date)` (user_item).
+Every feature is computed by `src/features/build.py` and served through `src/features/store.py`.
+
+| feature | entity | dtype | description | transformation | source | used_by | null % | training_view_stats |
+|---|---|---|---|---|---|---|---|---|
+| user_activity_count | user | int | Number of recipes the user reviewed before as_of | count(interactions) per user | interactions | hybrid (cold-user gating), eval segments | 0.00 | mean 6.532 (min 1, max 7671) |
+| user_rated_count | user | int | Number of reviews that carry a 1-5 star rating | count(rating not null) | interactions | - | 0.00 | mean 6.262 (min 0, max 7665) |
+| user_avg_rating | user | float | Mean star rating given by the user (global mean if none) | mean(rating), fillna(global mean) | interactions | mf cold-start fallback | 0.00 | mean 4.608 (min 1, max 5) |
+| user_rating_std | user | float | Std-dev of the user's ratings (0 if < 2 ratings) | std(rating), fillna(0) | interactions | - | 0.00 | mean 0.1464 (min 0, max 2.828) |
+| user_days_since_last_interaction | user | int | Days between the user's last review and as_of | as_of - max(date) | interactions | - | 0.00 | mean 1614 (min 1, max 5146) |
+| user_tenure_days | user | int | Days since the user first appeared (review or recipe upload) | as_of - min(member_since, first interaction) | interactions, users | - | 0.00 | mean 1886 (min 1, max 5318) |
+| user_interactions_last_365d | user | int | Reviews written in the 365 days before as_of | count(date >= as_of - 365d) | interactions | - | 0.00 | mean 0.2977 (min 0, max 438) |
+| user_preferred_category | user | category | Most frequent recipe category the user reviewed | mode(recipe.category) | interactions, recipes | hybrid (category boost) | 0.00 | top: main-dish |
+| user_preferred_category_share | user | float | Share of the user's reviews in the preferred category | count(mode)/count(*) | interactions, recipes | - | 0.00 | mean 0.8471 (min 0.1176, max 1) |
+| user_category_entropy | user | float | Shannon entropy (bits) of the user's category distribution | -sum(p log2 p) over categories | interactions, recipes | - | 0.00 | mean 0.4568 (min 0, max 3.533) |
+| user_preferred_cuisine | user | category | Most frequent cuisine tag among reviewed recipes | mode(recipe.cuisine) | interactions, recipes | - | 0.00 | top: unspecified |
+| user_avg_recipe_minutes | user | float | Average preparation time of recipes the user reviewed | mean(recipe.minutes) | interactions, recipes | - | 0.00 | mean 106.6 (min 1, max 4.32e+04) |
+| user_avg_recipe_calories | user | float | Average calories of recipes the user reviewed | mean(recipe.calories) | interactions, recipes | - | 0.00 | mean 493.3 (min 0, max 9703) |
+| user_avg_review_length | user | float | Average number of words per review | mean(review_length) | interactions | - | 0.00 | mean 46.61 (min 0, max 815) |
+| user_recipes_contributed | user | int | Recipes the user uploaded before as_of | count(recipes where contributor_id = user) | recipes | - | 0.00 | mean 1.362 (min 0, max 3118) |
+| item_popularity | item | int | Number of reviews of the recipe before as_of | count(interactions) per recipe | interactions | popularity, hybrid | 0.00 | mean 4.427 (min 0, max 1514) |
+| item_rated_count | item | int | Number of star-rated reviews | count(rating not null) | interactions | - | 0.00 | mean 4.244 (min 0, max 1431) |
+| item_avg_rating | item | float | Mean star rating of the recipe (NaN if never rated) | mean(rating) | interactions | - | 4.62 | mean 4.59 (min 1, max 5) |
+| item_bayesian_rating | item | float | Average rating shrunk towards the global mean | (n*avg + m*global)/(n+m), m = features.bayesian_prior_weight | interactions | popularity (rating prediction) | 0.00 | mean 4.666 (min 3.449, max 4.984) |
+| item_recent_popularity | item | int | Reviews in the 365 days before as_of | count(date >= as_of - 365d) | interactions | - | 0.00 | mean 0.2018 (min 0, max 126) |
+| item_days_since_last_interaction | item | float | Days since the recipe was last reviewed (NaN if never) | as_of - max(date) | interactions | - | 2.79 | mean 1541 (min 1, max 5017) |
+| item_age_days | item | int | Days since the recipe was submitted | as_of - submitted | recipes | - | 0.00 | mean 2685 (min 1, max 5318) |
+| item_category | item | category | Primary course category derived from tags | first tag found in preparation.category_priority | recipes | hybrid, diversity analysis | 0.00 | top: main-dish |
+| item_cuisine | item | category | Cuisine derived from tags | first tag in preparation.cuisine_tags | recipes | - | 0.00 | top: unspecified |
+| item_minutes | item | float | Preparation time in minutes (implausible values imputed) | clean minutes | recipes | - | 0.00 | mean 95.74 (min 1, max 4.32e+04) |
+| item_n_steps | item | int | Number of preparation steps | n_steps | recipes | - | 0.00 | mean 9.742 (min 0, max 145) |
+| item_n_ingredients | item | int | Number of ingredients | n_ingredients | recipes | - | 0.00 | mean 9.044 (min 1, max 43) |
+| item_calories | item | float | Calories per serving (implausible values imputed) | nutrition[0] | recipes | - | 0.00 | mean 463.3 (min 0, max 9987) |
+| item_n_tags | item | int | Number of distinct tags | len(tags) | recipes | - | 0.00 | mean 17.92 (min 0, max 73) |
+| item_content_tfidf | item | sparse vector | TF-IDF vector over tags and ingredients | TfidfVectorizer(tags + ingredients, min_df, max_df) | recipes | content, hybrid, diversity metric | 0.00 | 8464 dims |
+| ui_rating_deviation_user | user_item | float | Rating minus the user's average rating | rating - user_avg_rating | interactions | - | 4.13 | mean 1.69e-19 (min -3.98, max 3.111) |
+| ui_rating_deviation_item | user_item | float | Rating minus the recipe's average rating | rating - item_avg_rating | interactions | - | 4.13 | mean -2.505e-18 (min -3.952, max 3.2) |
+| ui_category_match | user_item | bool | Recipe category equals the user's preferred category | item_category == user_preferred_category | interactions, recipes | - | 0.00 | top: False |
+| ui_recipe_age_at_interaction_days | user_item | int | Age of the recipe when it was reviewed | date - submitted | interactions, recipes | - | 0.00 | mean 1154 (min 0, max 5289) |
+| ui_user_sequence_number | user_item | int | n-th review of this user (chronological, 1-based) | cumcount per user ordered by date | interactions | - | 0.00 | mean 257.3 (min 1, max 7671) |
+| ui_days_since_prev_interaction | user_item | float | Days since the user's previous review (NaN for first) | date - lag(date) per user | interactions | - | 15.31 | mean 46.8 (min 0, max 4098) |
