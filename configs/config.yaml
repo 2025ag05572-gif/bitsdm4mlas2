@@ -1,0 +1,143 @@
+# Central configuration for the Food.com recommendation pipeline.
+# Every stage reads this file, so a run is fully described by (config + raw data checksums).
+
+project:
+  name: foodcom-recsys
+  seed: 42
+
+paths:
+  raw_dir: data/raw
+  source_dir: data/raw/source          # where the Kaggle zip / CSVs are placed
+  processed_dir: data/processed
+  features_dir: data/features
+  errors_dir: data/errors
+  models_dir: models
+  reports_dir: reports
+  logs_dir: logs
+
+# ---------------------------------------------------------------- ingestion
+ingestion:
+  # local  -> read RAW_recipes.csv / RAW_interactions.csv (or the Kaggle zip) from paths.source_dir
+  # kaggle -> download with the Kaggle API (needs ~/.kaggle/kaggle.json), then same as local
+  source: local
+  kaggle_dataset: shuyangli94/food-com-recipes-and-user-interactions
+  files:
+    recipes: RAW_recipes.csv
+    interactions: RAW_interactions.csv
+
+# --------------------------------------------------------------- validation
+validation:
+  rating_values: [0, 1, 2, 3, 4, 5]     # 0 = review written without a star rating (Food.com convention)
+  min_date: "1999-01-01"                # Food.com launched in 1999
+  max_date: "2018-12-31"                # end of the crawl
+  max_recipe_minutes: 43200             # > 30 days is treated as a data-entry error (warning, fixed later)
+  nutrition_length: 7
+  max_calories: 10000                   # per serving; above this is flagged as a warning
+  min_pass_rate: 0.95                   # quality gate: pipeline stops if a table's pass rate is lower
+
+# -------------------------------------------------------------- preparation
+preparation:
+  zero_rating_as_missing: true          # rating 0 -> NaN, interaction kept as an implicit signal
+  duplicate_user_item: keep_latest      # same user reviewing the same recipe twice
+  category_priority:                    # first matching tag becomes the recipe's primary category
+    - desserts
+    - main-dish
+    - side-dishes
+    - appetizers
+    - breakfast
+    - salads
+    - soups-stews
+    - breads
+    - beverages
+    - snacks
+    - lunch
+    - condiments-etc
+  cuisine_tags:
+    - american
+    - italian
+    - mexican
+    - asian
+    - european
+    - indian
+    - greek
+    - french
+    - middle-eastern
+    - african
+    - south-american
+    - caribbean
+
+# ----------------------------------------------------------- transformation
+transformation:
+  split:
+    method: time
+    test_fraction: 0.10                 # latest 10% of interactions (by date) form the test window
+  min_user_interactions: 5              # k-core filter applied to TRAIN only
+  min_item_interactions: 5
+  relevance_threshold: 4                # test interaction is "relevant" if rating >= 4 (unrated reviews count as relevant)
+
+# ------------------------------------------------------------------ features
+features:
+  recent_window_days: 365
+  bayesian_prior_weight: 10             # m in (n*avg + m*global)/(n+m)
+
+# ------------------------------------------------------------------ training
+training:
+  k: 10
+  use_tuned_params: true                # merge models/best_params.json (written by the tuning stage) over the values below
+  tuning:
+    enabled: true
+    val_fraction: 0.10                  # latest 10% of TRAIN interactions = validation window
+    grid:
+      popularity:
+        score: [count, recent_count, bayesian_rating]
+      item_knn:
+        n_neighbors: [50, 200, 500]
+        user_weighting: [none, log]
+        shrinkage: [10]
+        history_window: [null, 25, 100]
+      mf:
+        n_factors: [16, 64]
+        reg: [0.02, 0.1]
+      hybrid:
+        weights:                        # [w_knn, w_content, w_popularity]
+          - [0.6, 0.25, 0.15]
+          - [0.7, 0.1, 0.2]
+          - [0.5, 0.1, 0.4]
+          - [0.4, 0.0, 0.6]
+          - [0.3, 0.1, 0.6]
+        category_boost: [0.0, 0.05]
+  models:
+    popularity:
+      enabled: true
+      score: count                      # count | recent_count | bayesian_rating
+    item_knn:
+      enabled: true
+      n_neighbors: 200
+      shrinkage: 10
+      user_weighting: none              # none | log (down-weight very active reviewers)
+      history_window: null              # score with only the N most recent reviews (null = all)
+    content:
+      enabled: true
+    mf:
+      enabled: true
+      n_factors: 32
+      n_epochs: 25
+      learning_rate: 0.01
+      reg: 0.05
+      batch_size: 1024
+    hybrid:
+      enabled: true
+      w_knn: 0.6
+      w_content: 0.25
+      w_popularity: 0.15
+      cold_user_threshold: 10           # users with fewer interactions lean more on popularity
+      category_boost: 0.05
+      popularity_score: count
+
+evaluation:
+  k_values: [5, 10]
+  batch_size: 2000
+
+mlflow:
+  tracking_uri: sqlite:///mlflow.db
+  experiment_name: foodcom-recsys

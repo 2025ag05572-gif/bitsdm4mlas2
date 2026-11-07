@@ -1,0 +1,31 @@
+# Smoke-test configuration: runs the full pipeline on a small synthetic sample that has the
+# exact Food.com file format (generate it with `python -m scripts.make_sample_data`).
+base: config.yaml
+
+paths:
+  source_dir: data/sample/source
+  raw_dir: data/sample/raw
+  processed_dir: data/sample/processed
+  features_dir: data/sample/features
+  errors_dir: data/sample/errors
+  models_dir: data/sample/models
+  reports_dir: data/sample/reports
+
+transformation:
+  min_user_interactions: 3
+  min_item_interactions: 3
+
+training:
+  tuning:
+    grid:
+      item_knn:
+        n_neighbors: [50, 200]
+        user_weighting: [none, log]
+        shrinkage: [10]
+        history_window: [null]
+  models:
+    mf:
+      n_epochs: 5
+
+mlflow:
+  experiment_name: foodcom-recsys-sample

@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.prefect/
+logs/
+mlflow.db
+mlruns/
+models/*.joblib
+models/registry.json
+data/raw/*
+data/processed/*
+data/features/*
+data/errors/*
+data/sample/
+!data/**/.gitkeep
+# keep the small, human-readable outputs that are deliverables
+!data/errors/*_errors.csv
+.DS_Store
+reports/final_report.html
