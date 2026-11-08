@@ -91,21 +91,25 @@ training:
       popularity:
         score: [count, recent_count, bayesian_rating]
       item_knn:
-        n_neighbors: [50, 200, 500]
+        n_neighbors: [100, 300, 600]
         user_weighting: [none, log]
-        shrinkage: [10]
-        history_window: [null, 25, 100]
+        shrinkage: [10, 100]
+        history_window: [null, 50]
       mf:
-        n_factors: [16, 64]
-        reg: [0.02, 0.1]
+        n_factors: [16, 32, 64]
+        reg: [0.05, 0.1, 0.2]
       hybrid:
         weights:                        # [w_knn, w_content, w_popularity]
           - [0.6, 0.25, 0.15]
           - [0.7, 0.1, 0.2]
           - [0.5, 0.1, 0.4]
+          - [0.5, 0.0, 0.5]
           - [0.4, 0.0, 0.6]
           - [0.3, 0.1, 0.6]
+          - [0.3, 0.0, 0.7]
+          - [0.2, 0.1, 0.7]
         category_boost: [0.0, 0.05]
+        cold_user_threshold: [5, 20]
   models:
     popularity:
       enabled: true
@@ -137,6 +141,14 @@ training:
 evaluation:
   k_values: [5, 10]
   batch_size: 2000
+  bootstrap:                            # confidence intervals + paired significance test vs the baseline
+    n_resamples: 1000
+    confidence: 0.95
+    baseline: popularity
+  backtest:                             # rolling-origin evaluation on later, non-overlapping test windows
+    enabled: true
+    n_folds: 4                          # fold i: train = all reviews before cutoff_i, test = next horizon_days
+    horizon_days: 365                   # cutoff_0 = main split cutoff (after the tuning window, so no leakage)
 
 mlflow:
   tracking_uri: sqlite:///mlflow.db

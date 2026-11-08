@@ -138,10 +138,10 @@ def run(cfg: dict) -> dict:
         content = ContentRecommender().fit(data)
         pop = pops[best["popularity"]["score"]]
         g = grid["hybrid"]
-        for (wk, wc, wp), cb in itertools.product(g["weights"], g["category_boost"]):
+        cold = g.get("cold_user_threshold", [cfg["training"]["models"]["hybrid"]["cold_user_threshold"]])
+        for (wk, wc, wp), cb, ct in itertools.product(g["weights"], g["category_boost"], cold):
             params = {"w_knn": wk, "w_content": wc, "w_popularity": wp, "category_boost": cb,
-                      "cold_user_threshold": cfg["training"]["models"]["hybrid"]["cold_user_threshold"],
-                      "popularity_score": best["popularity"]["score"]}
+                      "cold_user_threshold": ct, "popularity_score": best["popularity"]["score"]}
             m = HybridRecommender(**params).fit(data, components={"knn": knn, "content": content, "pop": pop})
             record("hybrid", params, _score(m, data, users, relevant, k, batch))
         best["hybrid"] = max((r for r in rows if r["model"] == "hybrid"), key=lambda r: r[key])["params"]

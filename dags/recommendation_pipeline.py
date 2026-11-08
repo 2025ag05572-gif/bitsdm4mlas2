@@ -2,7 +2,7 @@
 
 DAG
     ingest -> validate (quality gate) -> prepare -> transform -> build_features -> tune
-           -> train[popularity | item_knn | content | mf | hybrid] -> evaluate -> publish_report
+           -> train[popularity | item_knn | content | mf | hybrid] -> evaluate -> backtest -> publish_report
 
 Every task wraps the `run()` function of one stage module, so the orchestrated run and
 `python -m src.pipeline` execute exactly the same code. Stages exchange data through files in
@@ -27,7 +27,7 @@ from prefect import flow, get_run_logger, task  # noqa: E402
 from prefect.artifacts import create_markdown_artifact, create_table_artifact  # noqa: E402
 from prefect.runtime import flow_run  # noqa: E402
 
-from src.evaluation import evaluate  # noqa: E402
+from src.evaluation import backtest, evaluate  # noqa: E402
 from src.features import build as features  # noqa: E402
 from src.ingestion import ingest  # noqa: E402
 from src.preparation import prepare  # noqa: E402
@@ -96,9 +96,24 @@ def evaluate_task(cfg: dict, trained: list[dict]) -> dict:
     return {"k": k, "results": table}
 
 
+@task(name="backtest")
+def backtest_task(cfg: dict, evaluated: dict) -> dict:
+    if not cfg["evaluation"]["backtest"]["enabled"]:
+        return {"skipped": True}
+    res = backtest.run(cfg)
+    k = cfg["training"]["k"]
+    table = res.groupby("model")[f"ndcg_at_{k}"].agg(["mean", "std", "min", "max"]).round(4).reset_index()
+    create_table_artifact(key="backtest-summary", table=table.to_dict("records"),
+                          description=f"NDCG@{k} over rolling-origin folds")
+    return {"folds": int(res["fold"].nunique())}
+
+
 @task(name="publish-report")
-def publish_task(cfg: dict, evaluated: dict) -> str:
-    md = (Path(cfg["paths"]["reports_dir"]) / "evaluation" / "results.md").read_text()
+def publish_task(cfg: dict, evaluated: dict, backtested: dict) -> str:
+    ev = Path(cfg["paths"]["reports_dir"]) / "evaluation"
+    md = (ev / "results.md").read_text()
+    if (ev / "backtest.md").exists() and not backtested.get("skipped"):
+        md += "\n\n" + (ev / "backtest.md").read_text()
     create_markdown_artifact(key="evaluation-report", markdown=md, description="Model evaluation results")
     return md
 
@@ -119,7 +134,8 @@ def recommendation_pipeline(config_path: str | None = None) -> dict:
     trained = [train_task.with_options(task_run_name=f"train-{m}")(cfg, m, tuned)
                for m in train.enabled_models(cfg)]
     evaluated = evaluate_task(cfg, trained)
-    publish_task(cfg, evaluated)
+    backtested = backtest_task(cfg, evaluated)
+    publish_task(cfg, evaluated, backtested)
     return evaluated
 
 

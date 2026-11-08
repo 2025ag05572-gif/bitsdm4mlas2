@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-11-07T16:07:28Z",
+  "generated_at": "2026-11-08T05:49:29Z",
   "inner_cutoff": "2011-08-02T00:00:00",
   "selection_metric": "val_ndcg_at_10",
-  "mlflow_run_id": "974bf6a6b511496f9038bbde46bee0d2",
+  "mlflow_run_id": "2bc98220c6ba40f5bc3ac8674f0ba771",
   "params": {
     "popularity": {
       "score": "count"
     },
     "item_knn": {
-      "n_neighbors": 500,
+      "n_neighbors": 300,
       "user_weighting": "log",
-      "shrinkage": 10,
+      "shrinkage": 100,
       "history_window": null
     },
     "mf": {
       "n_factors": 16,
-      "reg": 0.1
+      "reg": 0.2
     },
     "hybrid": {
-      "w_knn": 0.3,
+      "w_knn": 0.2,
       "w_content": 0.1,
-      "w_popularity": 0.6,
+      "w_popularity": 0.7,
       "category_boost": 0.0,
-      "cold_user_threshold": 10,
+      "cold_user_threshold": 20,
       "popularity_score": "count"
     }
   }

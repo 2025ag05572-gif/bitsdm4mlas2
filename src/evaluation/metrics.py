@@ -72,3 +72,19 @@ def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 
 def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(np.mean(np.abs(np.asarray(y_true) - np.asarray(y_pred))))
+
+
+def per_user_scores(recs: np.ndarray, relevant: Sequence[set], k: int) -> dict[str, np.ndarray]:
+    """Per-user precision / recall / NDCG / hit@k (all users must have >= 1 relevant item).
+
+    The means of these arrays equal the aggregate metrics above; the arrays are what the
+    bootstrap confidence intervals and paired significance tests resample.
+    """
+    discounts = 1.0 / np.log2(np.arange(2, k + 2))
+    p, r, n, h = (np.empty(len(relevant)) for _ in range(4))
+    for j, (rec, rel) in enumerate(zip(recs, relevant)):
+        hits = np.array([1.0 if i in rel else 0.0 for i in rec[:k]])
+        nh = hits.sum()
+        p[j], r[j], h[j] = nh / k, nh / len(rel), float(nh > 0)
+        n[j] = float(hits @ discounts[: len(hits)]) / float(discounts[: min(len(rel), k)].sum())
+    return {f"precision_at_{k}": p, f"recall_at_{k}": r, f"ndcg_at_{k}": n, f"hit_rate_at_{k}": h}

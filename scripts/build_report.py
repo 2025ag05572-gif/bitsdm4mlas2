@@ -19,8 +19,8 @@ h2 { font-size: 11.5pt; margin: 9pt 0 3pt 0; border-bottom: 1px solid #ddd; padd
 h3 { font-size: 10pt; margin: 6pt 0 2pt 0; }
 p, li { margin: 2pt 0; }
 ul { margin: 2pt 0 2pt 0; padding-left: 15pt; }
-table { border-collapse: collapse; margin: 4pt 0 6pt 0; font-size: 8.4pt; }
-th, td { border: 1px solid #ccc; padding: 1.5pt 4pt; text-align: right; }
+table { border-collapse: collapse; margin: 4pt 0 6pt 0; font-size: 8pt; }
+th, td { border: 1px solid #ccc; padding: 1.5pt 3.5pt; text-align: right; white-space: nowrap; }
 th { background: #f3f2ee; }
 td:first-child, th:first-child { text-align: left; }
 img { max-width: 100%; display: block; margin: 4pt auto; }

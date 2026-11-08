@@ -7,7 +7,7 @@ from __future__ import annotations
 import argparse
 import time
 
-from src.evaluation import evaluate
+from src.evaluation import backtest, evaluate
 from src.features import build as features
 from src.ingestion import ingest
 from src.preparation import prepare
@@ -25,6 +25,7 @@ STAGES = [
     ("tuning", lambda cfg: tune.run(cfg) if cfg["training"]["tuning"]["enabled"] else None),
     ("training", train.run),
     ("evaluation", evaluate.run),
+    ("backtest", lambda cfg: backtest.run(cfg) if cfg["evaluation"]["backtest"]["enabled"] else None),
 ]
 
 

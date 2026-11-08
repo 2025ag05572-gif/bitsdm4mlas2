@@ -1,6 +1,6 @@
 # Feature Catalog
 
-Generated 2026-11-07T16:03:34Z from the **training** view (as_of = 2014-02-26).
+Generated 2026-11-08T05:40:46Z from the **training** view (as_of = 2014-02-26).
 Entity keys: `user_id` (user), `recipe_id` (item), `(user_id, recipe_id, date)` (user_item).
 Every feature is computed by `src/features/build.py` and served through `src/features/store.py`.
 

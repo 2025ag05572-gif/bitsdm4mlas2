@@ -18,34 +18,43 @@ I built a recommendation pipeline for a recipe website: given what a user has re
 
 **Feature management.** Instead of Feast I wrote a small feature store. `registry.py` defines 36 documented features: 15 user features (activity count, average rating, days since last review, preferred category, category entropy, …), 15 item features (popularity, Bayesian rating, recent popularity, age, category, minutes, a TF-IDF content vector, …) and 6 interaction features. The same `compute_features(as_of)` code materialises a **training view** (as of the cutoff, so it is point-in-time correct) and a **serving view** (all data). `FeatureStore` is the only read path for training, evaluation and the `recommend.py` CLI, which falls back to recent popularity for unknown users. The catalog in `reports/feature_catalog.md` is generated from the registry.
 
-**Models and tracking.** (1) A **popularity** baseline, using review counts from the feature store. (2) **Item-kNN** collaborative filtering: cosine similarity with shrinkage and top-N neighbours. (3) **Content-based**: TF-IDF over tags and ingredients. (4) **Biased matrix factorisation**: mini-batch SGD on star ratings. (5) A **hybrid** that blends item-kNN, content and popularity, using the `user_activity_count` and `user_preferred_category` features. Hyperparameters are chosen by a **tuning stage that never touches the test set**. It carves a validation window out of the end of the training period, rebuilds features as of that inner cutoff, and logs 35 trials as nested MLflow runs. Every model run logs its parameters, data statistics, fit time, MF learning curve, model file, config and feature metadata to **MLflow**. Evaluation then logs its metrics back to the same run.
+**Models and tracking.** (1) A **popularity** baseline, using review counts from the feature store. (2) **Item-kNN** collaborative filtering: cosine similarity with shrinkage, down-weighting of heavy reviewers, and top-N neighbours. (3) **Content-based**: TF-IDF over tags and ingredients. (4) **Biased matrix factorisation**: mini-batch SGD on star ratings. (5) A **hybrid** that blends item-kNN, content and popularity, using the `user_activity_count` and `user_preferred_category` features. Hyperparameters are chosen by a **tuning stage that never touches the test set**. It carves a validation window (Aug-2011 to Feb-2014) out of the end of the training period, rebuilds features as of that inner cutoff, and logs 68 grid-search trials as nested MLflow runs. Every model run logs its parameters, data statistics, fit time, MF learning curve, model file, config and feature metadata to **MLflow**. Evaluation then logs its metrics and confidence intervals back to the same run.
 
-**Orchestration and reproducibility.** `dags/recommendation_pipeline.py` is a **Prefect** flow with 13 tasks: ingest → validate → prepare → transform → features → tune → 5 × train → evaluate → publish. It has retries on ingestion, the quality gate, and table and markdown artifacts in the UI. `--serve` registers a weekly schedule. A full run takes about 5 min 45 s on a laptop (screenshot below). All settings live in one YAML file, and the run is reproducible through fixed seeds, pinned `requirements.txt`, source checksums, and a pipeline run id stored on every MLflow run. `make sample` runs the same code on a small synthetic sample in the same file format, and pytest covers the metrics, the validation rules, the quality gate and the absence of leakage across the split.
+**Evaluation design.** The main test set is all warm reviews after the cutoff. Each metric gets a **95% bootstrap confidence interval** over users (1,000 resamples). Every model is compared with the popularity baseline using a **paired bootstrap test** on the same users. As a second check, a **rolling-origin backtest** re-fits every model on 4 expanding windows and tests each on the following year (Feb-2014 to Feb-2018). All four test years come after the tuning window, so model selection never sees them.
 
-![Successful Prefect run: all 13 tasks Completed in 5 min 43 s](figures/prefect_flow_graph.png)
+**Orchestration and reproducibility.** `dags/recommendation_pipeline.py` is a **Prefect** flow with 14 tasks: ingest → validate → prepare → transform → features → tune → 5 × train → evaluate → backtest → publish. It has retries on ingestion, the quality gate, and table and markdown artifacts in the UI. `--serve` registers a weekly schedule. A full run takes about 14 minutes on a laptop (screenshot below). All settings live in one YAML file, and the run is reproducible through fixed seeds, pinned `requirements.txt`, source checksums, and a pipeline run id stored on every MLflow run. `make sample` runs the same code on a small synthetic sample in the same file format, and pytest covers the metrics, the bootstrap, the validation rules, the quality gate and the absence of leakage across the split.
+
+![Successful Prefect run: all 14 tasks Completed in 13 min 42 s](figures/prefect_flow_graph.png)
 
 ## 3. Results
 
-Test window 26-Feb-2014 to 20-Dec-2018. Seen recipes are excluded. Coverage is the share of the 39,405 train recipes that appear in any top-10 list. Diversity is 1 − mean pairwise TF-IDF cosine similarity within a list.
+Test window 26-Feb-2014 to 20-Dec-2018, 2,235 warm users. Seen recipes are excluded. Coverage is the share of the 39,405 train recipes that appear in any top-10 list. Diversity is 1 − mean pairwise TF-IDF cosine similarity within a list. Δ is the paired difference in NDCG@10 against popularity, with its bootstrap p-value.
 
-| Model | P@10 | R@10 | NDCG@10 | HitRate@10 | NDCG@5 | Coverage@10 | Diversity@10 | RMSE | MAE |
-|---|---|---|---|---|---|---|---|---|---|
-| Popularity (baseline) | **0.0068** | **0.0246** | 0.0148 | **0.0591** | 0.0110 | 0.0011 | 0.913 | 0.629 | 0.420 |
-| Item-kNN | 0.0063 | 0.0231 | 0.0152 | 0.0559 | 0.0122 | 0.0233 | 0.908 | – | – |
-| Content (TF-IDF) | 0.0006 | 0.0020 | 0.0013 | 0.0058 | 0.0009 | **0.1028** | 0.649 | – | – |
-| Biased MF | 0.0001 | 0.0003 | 0.0004 | 0.0009 | 0.0004 | 0.0073 | **0.953** | **0.587** | **0.358** |
-| Hybrid | 0.0066 | 0.0214 | **0.0164** | 0.0564 | **0.0138** | 0.0023 | 0.902 | – | – |
+| Model | P@10 | R@10 | NDCG@10 [95% CI] | Δ vs pop. (p) | Coverage@10 | Diversity@10 | RMSE | MAE |
+|---|---|---|---|---|---|---|---|---|
+| Popularity | 0.0068 | 0.0246 | 0.0148 [0.0118, 0.0181] | – | 0.0011 | 0.913 | 0.629 | 0.420 |
+| Item-kNN | 0.0069 | 0.0238 | **0.0164** [0.0130, 0.0202] | +0.0016 (0.11) | 0.0062 | 0.905 | – | – |
+| Content (TF-IDF) | 0.0006 | 0.0020 | 0.0013 [0.0004, 0.0024] | −0.0135 (<0.001) | **0.1028** | 0.649 | – | – |
+| Biased MF | 0.0001 | 0.0003 | 0.0003 [0.0000, 0.0007] | −0.0146 (<0.001) | 0.0041 | **0.957** | **0.586** | **0.360** |
+| Hybrid | **0.0074** | **0.0251** | 0.0160 [0.0129, 0.0193] | +0.0011 (**0.04**) | 0.0012 | 0.906 | – | – |
 
 Predicting the global mean rating gives RMSE 0.639 and MAE 0.437.
 
-- **Popularity is a very strong baseline here.** It has the best precision, recall and hit rate. The hybrid wins on NDCG@10 (+11%) and NDCG@5 (+25%), so it puts the hits higher in the list, but it does so with little coverage, because tuning gave popularity 60% of the weight.
-- **Item-kNN is the most balanced personalised model.** It matches popularity on NDCG while covering 21× more of the catalog. Tuning made a big difference: down-weighting very heavy reviewers (some have more than 2,000 reviews) improved validation NDCG@10 by about 60%. Item-kNN works best for users with 10–49 reviews (NDCG@10 0.019 vs 0.016 for popularity), while popularity stays better for users with 5–9 reviews.
+Rolling-origin backtest, NDCG@10 on each following year (users per year: 1,539 / 850 / 704 / 587):
+
+| Model | 2014–15 | 2015–16 | 2016–17 | 2017–18 | Mean ± SD | Years > popularity |
+|---|---|---|---|---|---|---|
+| Item-kNN | 0.0144 | 0.0146 | 0.0102 | 0.0120 | **0.0128 ± 0.0021** | 3 / 4 |
+| Hybrid | 0.0145 | 0.0134 | 0.0105 | 0.0108 | 0.0123 ± 0.0020 | 2 / 4 |
+| Popularity | 0.0133 | 0.0127 | 0.0111 | 0.0114 | 0.0121 ± 0.0011 | – |
+| Content / MF | ≤ 0.0014 | | | | 0.0010 / 0.0005 | 0 / 4 |
+
+- **Popularity is a very strong baseline, and the personalised gains are small.** Item-kNN and the hybrid both beat popularity on the main split. Only the hybrid's gain is statistically significant (p = 0.04), and the intervals of all three overlap. The backtest agrees: item-kNN wins in 3 of 4 years by about 6% on average, but popularity is the most stable of the three (lowest SD). So I would deploy item-kNN or the hybrid, with popularity as a fallback that is just as good.
+- **Tuning moved item-kNN towards popularity.** Down-weighting heavy reviewers (some have more than 2,000 reviews) together with stronger shrinkage raised validation NDCG@10 from about 0.011 to 0.020. It also cut coverage from 22% to 1%, because both settings favour well-reviewed recipes. That is an accuracy–coverage trade-off a real product would have to decide on explicitly.
 - **Matrix factorisation is good at rating prediction but useless for ranking.** It has the lowest RMSE (8% below the global mean), but because almost every rating is 4–5 stars, its item biases mostly pick obscure recipes with a couple of 5-star reviews. This is the well-known gap between RMSE and top-N accuracy. Content-based filtering has the highest coverage but low accuracy, because many tags are generic (e.g. "60-minutes-or-less").
 
 ## 4. Limitations and future work
 
-- **Absolute scores are low.** NDCG@10 ≈ 0.016, because the matrix is 99.92% empty and the test window spans almost five years of taste and catalog drift. **79% of test reviews come from users who were new, or had fewer than 5 reviews, before the cutoff**, so they are excluded from the warm-start metrics. In the CLI those users get the popularity fallback, but its quality is not measured.
-- **Evaluation design.** I used one global split and report no confidence intervals or significance tests, and the hyperparameter grid is small. A rolling-window split and bootstrapped intervals would make the model comparison more trustworthy.
 - **Ratings and relevance are close to "reviewed".** Ratings are so positive that "relevant = 4+ stars" means almost any review. Treating star-less (0) reviews as missing is my own interpretation. An implicit-feedback model (ALS or BPR) would probably rank better than explicit MF.
 - **User data is thin.** The reconstructed user table has no demographics, so user features come only from behaviour.
 - **Infrastructure is local only.** The feature store is offline Parquet with full recomputation (no online store or incremental updates), MLflow and Prefect run locally, and data versioning relies on checksums rather than a tool like DVC. Adding Feast or another online store, DVC, and a scheduled Prefect deployment with drift monitoring would be the next steps.

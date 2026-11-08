@@ -1,6 +1,6 @@
 # Data Validation Report
 
-Generated: 2026-11-07T16:02:48Z
+Generated: 2026-11-08T05:39:59Z
 
 Rows breaking an **error** rule are quarantined to `data/errors/<table>_errors.csv`. **Warning** rules keep the row and are handled in the preparation stage.
 

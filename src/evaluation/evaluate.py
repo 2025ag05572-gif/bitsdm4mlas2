@@ -8,6 +8,8 @@ Protocol (time-based, warm-start):
   * beyond-accuracy @K: catalog Coverage, Diversity (intra-list, TF-IDF cosine), category diversity, novelty
   * rating metrics (models that predict stars): RMSE and MAE on all rated warm test interactions,
     next to a global-mean reference
+  * uncertainty: 95% bootstrap confidence intervals over users, and a paired bootstrap test of every
+    model against the popularity baseline (same users, so the comparison is paired)
 Results go to reports/evaluation/ and are logged to each model's MLflow training run.
 """
 from __future__ import annotations
@@ -21,6 +23,7 @@ import pandas as pd
 from sklearn.preprocessing import normalize
 
 from src.evaluation import metrics as M
+from src.evaluation.stats import bootstrap_ci, paired_bootstrap
 from src.features.store import FeatureStore
 from src.training.models import load_train_data
 from src.utils.common import (
@@ -123,7 +126,7 @@ def run(cfg: dict) -> dict:
 
     rated = test[test["rating"].notna()]
     registry = read_json(Path(cfg["paths"]["models_dir"]) / "registry.json")
-    rows, seg_rows, recs_by_model = [], [], {}
+    rows, seg_rows, recs_by_model, per_user = [], [], {}, {}
     mlflow = setup_mlflow(cfg)
     for name, entry in registry.items():
         if not cfg["training"]["models"].get(name, {}).get("enabled", True):
@@ -131,6 +134,7 @@ def run(cfg: dict) -> dict:
         model = joblib.load(entry["path"])
         recs = top_k(model, eval_users, data.R, kmax, ecfg["batch_size"])
         recs_by_model[name] = recs
+        per_user[name] = M.per_user_scores(recs, relevant, kmax)
         res = {"model": name, **ranking_metrics(recs, relevant, ks, data.n_items, V, cats, pop, data.n_users)}
         if model.predicts_ratings:
             pred = model.predict(rated["uidx"].values, rated["iidx"].values)
@@ -156,6 +160,16 @@ def run(cfg: dict) -> dict:
                  f" RMSE={res['rmse']:.4f} MAE={res['mae']:.4f}" if pd.notna(res["rmse"]) else "")
 
     results = pd.DataFrame(rows)
+    significance = uncertainty(per_user, ecfg.get("bootstrap", {}), cfg["project"]["seed"])
+    significance.to_csv(out_dir / "significance.csv", index=False)
+    for name, entry in registry.items():
+        sub = significance[significance["model"] == name]
+        if len(sub):
+            with mlflow.start_run(run_id=entry["run_id"]):
+                for r in sub.itertuples():
+                    mlflow.log_metrics({f"{r.metric}_ci_low": r.ci_low, f"{r.metric}_ci_high": r.ci_high})
+                    if pd.notna(r.p_value):
+                        mlflow.log_metric(f"{r.metric}_p_vs_baseline", r.p_value)
     gm = float(data.ratings.data.mean())
     reference = {"model": "global_mean (reference)", "rmse": M.rmse(rated["rating"], np.full(len(rated), gm)),
                  "mae": M.mae(rated["rating"], np.full(len(rated), gm))}
@@ -169,9 +183,11 @@ def run(cfg: dict) -> dict:
         "eval_users": int(len(eval_users)), "relevant_interactions": int(sum(map(len, relevant))),
         "rated_test_interactions": int(len(rated)), "cutoff_date": split["cutoff_date"],
         "results": results.to_dict("records"), "rating_reference": reference,
+        "significance": significance.to_dict("records"),
     }
     write_json(summary, out_dir / "results.json")
-    _write_markdown(results, segments, reference, summary, ks, out_dir / "results.md")
+    _write_markdown(results, segments, reference, summary, ks, out_dir / "results.md", significance,
+                    ecfg.get("bootstrap", {}))
     (out_dir / "sample_recommendations.md").write_text(
         _sample_recommendations(cfg, data, test, eval_users, recs_by_model, relevant))
 
@@ -190,7 +206,27 @@ def run(cfg: dict) -> dict:
     return summary
 
 
-def _write_markdown(results, segments, reference, summary, ks, path: Path) -> None:
+def uncertainty(per_user: dict, bcfg: dict, seed: int) -> pd.DataFrame:
+    """95% bootstrap CI per model/metric and paired bootstrap test against the baseline."""
+    n, conf = int(bcfg.get("n_resamples", 1000)), float(bcfg.get("confidence", 0.95))
+    base = bcfg.get("baseline", "popularity")
+    rows = []
+    for model, scores in per_user.items():
+        for metric, vals in scores.items():
+            lo, hi = bootstrap_ci(vals, n, conf, seed)
+            row = {"model": model, "metric": metric, "mean": float(vals.mean()), "ci_low": lo, "ci_high": hi,
+                   "diff_vs_baseline": np.nan, "diff_ci_low": np.nan, "diff_ci_high": np.nan, "p_value": np.nan}
+            if model != base and base in per_user:
+                t = paired_bootstrap(vals, per_user[base][metric], n, conf, seed)
+                row.update({"diff_vs_baseline": t["diff"], "diff_ci_low": t["diff_ci_low"],
+                            "diff_ci_high": t["diff_ci_high"], "p_value": t["p_value"]})
+            rows.append(row)
+    out = pd.DataFrame(rows)
+    out["significant"] = out["p_value"] < (1 - conf)
+    return out
+
+
+def _write_markdown(results, segments, reference, summary, ks, path: Path, significance=None, bcfg=None) -> None:
     lines = ["# Model Evaluation Results", "",
              f"Time-based split at **{pd.Timestamp(summary['cutoff_date']).date()}**. "
              f"{summary['eval_users']:,} warm test users, {summary['relevant_interactions']:,} relevant test "
@@ -205,6 +241,19 @@ def _write_markdown(results, segments, reference, summary, ks, path: Path) -> No
     rt = pd.concat([rt, pd.DataFrame([reference])], ignore_index=True)
     lines += ["## Rating prediction", "", df_to_markdown(rt), "",
               "Item-kNN, content and hybrid produce ranking scores only, so RMSE/MAE are not applicable.", ""]
+    if significance is not None and len(significance):
+        n = (bcfg or {}).get("n_resamples", 1000)
+        t = significance.copy()
+        t["95% CI"] = [f"[{a:.4f}, {b:.4f}]" for a, b in zip(t["ci_low"], t["ci_high"])]
+        t["diff vs popularity [95% CI]"] = [
+            "-" if pd.isna(d) else f"{d:+.4f} [{a:+.4f}, {b:+.4f}]"
+            for d, a, b in zip(t["diff_vs_baseline"], t["diff_ci_low"], t["diff_ci_high"])]
+        t["p"] = ["-" if pd.isna(p) else (f"<{1 / n:.3f}" if p <= 1 / n else f"{p:.3f}") for p in t["p_value"]]
+        t = t[["model", "metric", "mean", "95% CI", "diff vs popularity [95% CI]", "p"]]
+        lines += ["## Uncertainty and significance", "",
+                  f"Bootstrap over evaluation users ({n} resamples). The comparison with the popularity baseline is "
+                  "paired (each resample uses the same users for both models); p is a two-sided bootstrap p-value.", "",
+                  df_to_markdown(t), ""]
     if len(segments):
         lines += ["## By user activity (train-period review count)", "", df_to_markdown(segments), ""]
     lines += ["## Training time", "", df_to_markdown(results[["model", "fit_seconds"]], ".1f"), ""]
