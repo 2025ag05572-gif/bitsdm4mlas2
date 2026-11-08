@@ -53,14 +53,14 @@ recommendation-pipeline/
 
 ## Setup
 
-Requires Python 3.10+ (tested on 3.11, macOS).
+Requires **Python 3.11+** (the pinned scipy / scikit-learn / pyarrow / prefect versions need it; tested on 3.11, macOS). The full run peaks at about 6 GB RAM.
 
 ```bash
 python3.11 -m venv .venv
 .venv/bin/pip install -r requirements.txt          # or: make setup
 ```
 
-Download the dataset (needs a free Kaggle account): open the Kaggle link above → **Download** → put
+Download the dataset (needs a free Kaggle account): open the Kaggle link above → **Download** → `mkdir -p data/raw/source` and put
 `archive.zip` (or just `RAW_recipes.csv` and `RAW_interactions.csv`) in `data/raw/source/`.
 You don't need to unzip it; ingestion reads the two CSVs straight out of the zip.
 Or, with `~/.kaggle/kaggle.json` set up, `pip install kaggle` and set `ingestion.source: kaggle`.
@@ -90,7 +90,7 @@ make pipeline                       # = python -m src.pipeline [--from-stage fea
 make mlflow-ui                      # http://127.0.0.1:5000
 
 # recommendations for one user (serving feature view; unknown users get the cold-start fallback)
-make recommend USER=<user_id>
+make recommend USER_ID=<user_id> [MODEL=hybrid]
 
 # quick smoke test on a synthetic sample in the same file format (≈20 s)
 make sample
@@ -99,12 +99,16 @@ make test
 
 `python dags/recommendation_pipeline.py --serve` registers a `weekly-retrain` deployment (cron `0 3 * * 1`).
 
+Each stage's log also goes to its Prefect task run. With both UIs running, `pip install playwright` and
+`python -m scripts.capture_screenshots` re-captures the per-stage execution screenshots used in the report appendix
+(`reports/figures/stages/`). After that, `make report` rebuilds `reports/final_report.pdf`.
+
 ## What each stage does
 
 | Stage | Module | Output |
 |---|---|---|
 | Ingestion | `src/ingestion/ingest.py` | Reads the CSVs **as strings** (so badly typed values get caught by validation instead of crashing the reader), adds lineage columns (`_row_id`, `_source_file`), reconstructs the user table, writes Parquet and a manifest with SHA-256 checksums. The data is landed exactly as delivered; nothing is modified or added. |
-| Validation | `src/validation/` | Type coercion checks → Pandera schema (nulls, ranges, allowed ratings, date window) → duplicates, duplicate keys, referential integrity (interaction → recipe, interaction → user) → soft warnings. Error rows are quarantined in `data/errors/` with the rules they broke, and a quality gate stops the flow if a table's pass rate drops below 95%. Report: `reports/validation/validation_report.md`. |
+| Validation | `src/validation/` | Type coercion checks → Pandera schema (nulls, ranges, allowed ratings, date window) → duplicates, duplicate keys, referential integrity (interaction → recipe, interaction → user; the user table is rebuilt from the same files, so the user check is a safeguard for a real user source and cannot fail here) → soft warnings. Error rows are quarantined in `data/errors/` with the rules they broke, and a quality gate stops the flow if a table's pass rate drops below 95%. Report: `reports/validation/validation_report.md`. |
 | Preparation | `src/preparation/prepare.py` | Normalises text and tags, splits nutrition into 7 columns, sets implausible minutes/calories to missing and imputes the category median, maps rating 0 to missing (the interaction stays as an implicit signal), collapses repeat reviews of the same recipe (keeps the latest), derives category and cuisine from tags. |
 | Transformation | `src/transformation/transform.py` | Global **time-based split** (latest 10% of reviews by date = test), 5-core filter on train only, warm-start test set, user activity summary, item popularity, sparse user×item interaction and rating matrices. |
 | Features | `src/features/` | A custom feature store. `registry.py` defines 36 features (user, item and interaction features, plus a TF-IDF content vector). `build.py` materialises a **training** view (as of the cutoff, point-in-time correct) and a **serving** view (all data). `store.py` is the read API used by training, evaluation and serving. Catalog: `reports/feature_catalog.md`. |
@@ -135,7 +139,7 @@ Predicting the global mean rating gives RMSE 0.639 / MAE 0.437.
 
 ![model comparison](reports/evaluation/model_comparison.png)
 
-- **Popularity is hard to beat on Food.com.** The matrix is 99.92% empty and 94% of star ratings are 4–5. Item-kNN and the hybrid improve NDCG@10 by about 6–11%, but only the hybrid's gain on the main split is significant (p = 0.04).
+- **Popularity is hard to beat on Food.com.** The matrix is 99.92% empty and 94% of star ratings are 4–5. Item-kNN (+11%) and the hybrid (+7%) improve NDCG@10 over popularity, but the confidence intervals overlap. Only the hybrid's gain is nominally significant (p = 0.04, not corrected for multiple comparisons), and the tuned hybrid is 70% popularity, so **item-kNN is the main personalised model**: it is best on the main split and in the backtest.
 - **Tuning pushed item-kNN towards popular recipes.** It searched 68 settings on a validation window inside the train period. Down-weighting heavy reviewers and stronger shrinkage raised validation NDCG@10 from about 0.011 to 0.020 but cut coverage from 22% to 1%.
 - **MF gives the best RMSE but ranks poorly,** the usual gap between RMSE and top-N accuracy.
 - **Validation on the real data quarantined 1,246 reviews dated before their recipe was submitted** (`data/errors/interactions_errors.csv`). Every other error rule passed, and the warnings (missing descriptions, 0-minute or 2,147,483,647-minute recipes, star-less reviews) are handled in preparation.
@@ -150,10 +154,11 @@ A full run takes about 14 minutes on a laptop (peak RAM about 6 GB).
 | Setup & execution instructions | this README |
 | requirements.txt | `requirements.txt` |
 | Architecture diagram | `reports/figures/architecture.png` (`.dot` source alongside) |
-| Data validation report / logs | `reports/validation/validation_report.md`, `data/errors/*_errors.csv`, `logs/pipeline.log` |
+| Data validation report / logs | `reports/validation/validation_report.md`, `data/errors/*_errors.csv`, `reports/logs/pipeline_run.log` (full log of the final run) |
 | Feature catalog | `reports/feature_catalog.md` |
 | Model evaluation results | `reports/evaluation/results.md` (incl. CIs and significance), `backtest.md`, `model_comparison.png`, MLflow |
-| Orchestration DAG + successful run | `dags/recommendation_pipeline.py`, `reports/figures/prefect_flow_run.png`, `prefect_flow_graph.png` |
+| Orchestration DAG + successful run | `dags/recommendation_pipeline.py` (a Prefect flow, the equivalent of an Airflow DAG), `reports/figures/prefect_flow_run.png`, `prefect_flow_graph.png` |
+| Execution screenshots of every stage | Appendix of `reports/final_report.pdf`, images in `reports/figures/stages/` (captured by `scripts/capture_screenshots.py`) |
 | Experiment tracking screenshots | `reports/figures/mlflow_runs.png`, `mlflow_compare.png` |
 | Hyper-parameter tuning | `reports/tuning/tuning_results.md`, `models/best_params.json` |
 | Final report | `reports/final_report.pdf` |

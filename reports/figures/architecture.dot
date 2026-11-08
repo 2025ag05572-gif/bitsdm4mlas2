@@ -11,8 +11,10 @@ digraph pipeline {
   transform[label="4. Transformation\nglobal time split, train k-core,\nuser activity / item popularity,\nsparse user x item matrices"];
 
   features [label="5. Feature store\nregistry -> user / item / interaction\nfeatures + TF-IDF item content\nviews: training | serving"];
-  train    [label="6. Training (+ MLflow)\npopularity | item-kNN | content\nbiased MF | hybrid"];
-  evaluate [label="7. Evaluation\nP / R / NDCG / HitRate @5,10\ncoverage, diversity, novelty\nRMSE / MAE, user segments"];
+  tune     [label="6. Tuning\nvalidation window inside train\n68-trial grid, nested MLflow runs\n-> models/best_params.json"];
+  train    [label="7. Training (+ MLflow)\npopularity | item-kNN | content\nbiased MF | hybrid"];
+  evaluate [label="8. Evaluation\nP / R / NDCG / HitRate @5,10\ncoverage, diversity, RMSE / MAE\nbootstrap CIs, paired tests"];
+  backtest [label="9. Backtest\n4 rolling yearly folds\nre-fit + evaluate per fold"];
   serve    [label="Serving CLI (src/serving/recommend.py)\nmodels/*.joblib + serving feature view\ncold-start popularity fallback", fillcolor="#f3f2ee"];
 
   raw      [label="data/raw/\n*.parquet, manifest", shape=folder, fillcolor="#f3f2ee"];
@@ -24,12 +26,12 @@ digraph pipeline {
 
   {rank=same; src; ingest; validate; prepare; transform;}
   {rank=same; raw; errors; proc;}
-  {rank=same; features; train; evaluate; serve;}
-  {rank=same; fstore; mlflow; reports;}
+  {rank=same; features; tune; train; evaluate; backtest;}
+  {rank=same; fstore; mlflow; reports; serve;}
 
   src -> ingest -> validate -> prepare -> transform;
   transform -> features [constraint=false];
-  features -> train -> evaluate;
+  features -> tune -> train -> evaluate -> backtest;
   ingest -> raw [style=dashed, arrowhead=none];
   validate -> errors [style=dashed, label=" invalid rows"];
   transform -> proc [style=dashed, arrowhead=none];
@@ -38,5 +40,6 @@ digraph pipeline {
   train -> mlflow [style=dashed];
   evaluate -> mlflow [style=dashed, label=" metrics"];
   evaluate -> reports [style=dashed];
-  evaluate -> serve [style=invis];
+  backtest -> reports [style=dashed];
+  tune -> mlflow [style=dashed];
 }

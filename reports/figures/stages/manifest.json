@@ -1,0 +1,78 @@
+{
+ "flow_run": "satisfied-shoebill",
+ "state": "COMPLETED",
+ "start": "2026-11-08T06:16:48.522395Z",
+ "seconds": 821.066389,
+ "tasks": [
+  {
+   "stage": "ingest",
+   "state": "COMPLETED",
+   "seconds": 9.401147
+  },
+  {
+   "stage": "validate",
+   "state": "COMPLETED",
+   "seconds": 16.022451
+  },
+  {
+   "stage": "prepare",
+   "state": "COMPLETED",
+   "seconds": 15.514668
+  },
+  {
+   "stage": "transform",
+   "state": "COMPLETED",
+   "seconds": 2.448818
+  },
+  {
+   "stage": "build-features",
+   "state": "COMPLETED",
+   "seconds": 39.747543
+  },
+  {
+   "stage": "tune",
+   "state": "COMPLETED",
+   "seconds": 497.448411
+  },
+  {
+   "stage": "train-popularity",
+   "state": "COMPLETED",
+   "seconds": 0.118466
+  },
+  {
+   "stage": "train-item_knn",
+   "state": "COMPLETED",
+   "seconds": 12.033789
+  },
+  {
+   "stage": "train-content",
+   "state": "COMPLETED",
+   "seconds": 1.200538
+  },
+  {
+   "stage": "train-mf",
+   "state": "COMPLETED",
+   "seconds": 4.85257
+  },
+  {
+   "stage": "train-hybrid",
+   "state": "COMPLETED",
+   "seconds": 12.945082
+  },
+  {
+   "stage": "evaluate",
+   "state": "COMPLETED",
+   "seconds": 16.47533
+  },
+  {
+   "stage": "backtest",
+   "state": "COMPLETED",
+   "seconds": 192.757675
+  },
+  {
+   "stage": "publish-report",
+   "state": "COMPLETED",
+   "seconds": 0.014423
+  }
+ ]
+}

@@ -86,5 +86,5 @@ Bootstrap over evaluation users (1000 resamples). The comparison with the popula
 | popularity | 0.0 |
 | item_knn | 9.2 |
 | content | 0.2 |
-| mf | 4.8 |
+| mf | 4.6 |
 | hybrid | 9.2 |

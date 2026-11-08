@@ -73,7 +73,7 @@ transformation:
     test_fraction: 0.10                 # latest 10% of interactions (by date) form the test window
   min_user_interactions: 5              # k-core filter applied to TRAIN only
   min_item_interactions: 5
-  relevance_threshold: 4                # test interaction is "relevant" if rating >= 4 (unrated reviews count as relevant)
+  relevance_threshold: 4                # test interaction is "relevant" if rating >= 4 (star-less reviews are not relevant)
 
 # ------------------------------------------------------------------ features
 features:

@@ -26,10 +26,10 @@ mlflow-ui:        ## MLflow UI on http://127.0.0.1:5000 (loopback only)
 test:
 	$(PY) -m pytest -q tests
 
-recommend:        ## e.g. make recommend USER=424680
-	$(PY) -m src.serving.recommend --user-id $(USER) --model hybrid --k 10
+recommend:        ## e.g. make recommend USER_ID=424680 MODEL=item_knn
+	$(PY) -m src.serving.recommend --user-id $(USER_ID) --model $(or $(MODEL),item_knn) --k 10
 
-report:           ## render reports/final_report.md to HTML/PDF
+report:           ## render reports/final_report.md (incl. screenshot appendix) to HTML/PDF
 	$(PY) -m scripts.build_report
 
 clean:

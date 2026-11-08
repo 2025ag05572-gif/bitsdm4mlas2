@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+os.environ.setdefault("PIPELINE_PREFECT_LOGS", "1")  # stage loggers also report to the Prefect task run
 
 from prefect import flow, get_run_logger, task  # noqa: E402
 from prefect.artifacts import create_markdown_artifact, create_table_artifact  # noqa: E402

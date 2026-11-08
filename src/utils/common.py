@@ -54,6 +54,11 @@ def get_logger(name: str, cfg: dict | None = None) -> logging.Logger:
     fh = logging.FileHandler(logs_dir / "pipeline.log")
     fh.setFormatter(fmt)
     logger.addHandler(fh)
+    if os.environ.get("PIPELINE_PREFECT_LOGS") == "1":
+        # running inside the Prefect flow: also ship stage logs to the task run in the Prefect UI
+        from prefect.logging.handlers import APILogHandler
+
+        logger.addHandler(APILogHandler())
     logger.propagate = False
     return logger
 

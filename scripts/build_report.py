@@ -26,6 +26,12 @@ td:first-child, th:first-child { text-align: left; }
 img { max-width: 100%; display: block; margin: 4pt auto; }
 code { font-size: 8.6pt; background: #f3f2ee; padding: 0 2px; }
 .meta { color: #52514e; margin-bottom: 4pt; }
+.pb { page-break-before: always; }
+p.shot { margin: 3pt 0 1pt 0; font-size: 8.8pt; color: #52514e; }
+img.half { display: inline-block; width: 49.3%; margin: 2pt 0; vertical-align: top; }
+img.shot, img.half, img.wide { border: 1px solid #ddd; page-break-inside: avoid; }
+img.wide { display: block; width: 78%; margin: 2pt auto; }
+div.stage { page-break-inside: avoid; break-inside: avoid; margin: 0 0 5pt 0; }
 """
 
 CHROME = ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "google-chrome", "chromium"]

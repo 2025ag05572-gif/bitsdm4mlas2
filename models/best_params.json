@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-11-08T05:49:29Z",
+  "generated_at": "2026-11-08T06:26:29Z",
   "inner_cutoff": "2011-08-02T00:00:00",
   "selection_metric": "val_ndcg_at_10",
-  "mlflow_run_id": "2bc98220c6ba40f5bc3ac8674f0ba771",
+  "mlflow_run_id": "1ff3fbbc67c2430e9b4aa631024e06d8",
   "params": {
     "popularity": {
       "score": "count"

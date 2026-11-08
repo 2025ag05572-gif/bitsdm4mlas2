@@ -1,0 +1,129 @@
+2026-11-08 11:46:48,568 | INFO    | ingestion | Reading recipes from archive.zip::RAW_recipes.csv
+2026-11-08 11:46:51,518 | INFO    | ingestion |   recipes: 231637 rows, 12 columns
+2026-11-08 11:46:51,520 | INFO    | ingestion | Reading interactions from archive.zip::RAW_interactions.csv
+2026-11-08 11:46:55,018 | INFO    | ingestion |   interactions: 1132367 rows, 5 columns
+2026-11-08 11:46:55,782 | INFO    | ingestion | Reconstructed user dimension: 236719 accounts
+2026-11-08 11:46:57,866 | INFO    | ingestion | Ingestion done -> data/raw
+2026-11-08 11:47:10,800 | INFO    | validation | recipes: 231637 in -> 231637 valid, 0 quarantined, 5599 rows with warnings
+2026-11-08 11:47:11,112 | INFO    | validation | users: 236719 in -> 236719 valid, 0 quarantined, 0 rows with warnings
+2026-11-08 11:47:13,926 | INFO    | validation | interactions: 1132367 in -> 1131121 valid, 1246 quarantined, 61012 rows with warnings
+2026-11-08 11:47:29,450 | INFO    | preparation | Clean data: 231637 recipes, 236671 users, 1131121 interactions (1070294 rated)
+2026-11-08 11:47:31,938 | INFO    | transformation | Cutoff 2014-02-26 | train 525688 interactions (16865 users x 39405 items, density 0.00079) | warm test 12485 (2385 users)
+2026-11-08 11:47:49,608 | INFO    | features | [training] as_of=2014-02-26 users=155846 items=229944 interactions=1017931 vocab=8464
+2026-11-08 11:48:11,599 | INFO    | features | [serving] as_of=2018-12-21 users=226516 items=231637 interactions=1131121 vocab=8501
+2026-11-08 11:48:25,750 | INFO    | tuning | [tuning] as_of=2011-08-02 users=120895 items=218097 interactions=879016 vocab=8288
+2026-11-08 11:48:25,797 | INFO    | tuning | Validation window from 2011-08-02: inner-train 454221 interactions (15096 users x 34676 items), 4265 validation users
+2026-11-08 11:48:29,949 | INFO    | tuning |   popularity {'score': 'count'} -> {'val_ndcg_at_10': 0.0194, 'val_recall_at_10': 0.0268, 'val_precision_at_10': 0.0099, 'val_coverage_at_10': 0.0012}
+2026-11-08 11:48:31,091 | INFO    | tuning |   popularity {'score': 'recent_count'} -> {'val_ndcg_at_10': 0.0188, 'val_recall_at_10': 0.0259, 'val_precision_at_10': 0.0097, 'val_coverage_at_10': 0.0012}
+2026-11-08 11:48:32,433 | INFO    | tuning |   popularity {'score': 'bayesian_rating'} -> {'val_ndcg_at_10': 0.0024, 'val_recall_at_10': 0.0027, 'val_precision_at_10': 0.0015, 'val_coverage_at_10': 0.0004}
+2026-11-08 11:48:39,820 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'none', 'shrinkage': 10, 'history_window': None} -> {'val_ndcg_at_10': 0.0109, 'val_recall_at_10': 0.0141, 'val_precision_at_10': 0.0061, 'val_coverage_at_10': 0.2494}
+2026-11-08 11:48:40,590 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'none', 'shrinkage': 10, 'history_window': 50} -> {'val_ndcg_at_10': 0.0101, 'val_recall_at_10': 0.0139, 'val_precision_at_10': 0.0053, 'val_coverage_at_10': 0.2593}
+2026-11-08 11:48:47,766 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'none', 'shrinkage': 100, 'history_window': None} -> {'val_ndcg_at_10': 0.0168, 'val_recall_at_10': 0.0223, 'val_precision_at_10': 0.0092, 'val_coverage_at_10': 0.0287}
+2026-11-08 11:48:48,499 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'none', 'shrinkage': 100, 'history_window': 50} -> {'val_ndcg_at_10': 0.0166, 'val_recall_at_10': 0.0222, 'val_precision_at_10': 0.0092, 'val_coverage_at_10': 0.0309}
+2026-11-08 11:48:55,764 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'log', 'shrinkage': 10, 'history_window': None} -> {'val_ndcg_at_10': 0.0171, 'val_recall_at_10': 0.0233, 'val_precision_at_10': 0.0092, 'val_coverage_at_10': 0.062}
+2026-11-08 11:48:56,491 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'log', 'shrinkage': 10, 'history_window': 50} -> {'val_ndcg_at_10': 0.0166, 'val_recall_at_10': 0.023, 'val_precision_at_10': 0.0088, 'val_coverage_at_10': 0.0653}
+2026-11-08 11:49:03,707 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'log', 'shrinkage': 100, 'history_window': None} -> {'val_ndcg_at_10': 0.0194, 'val_recall_at_10': 0.0251, 'val_precision_at_10': 0.0098, 'val_coverage_at_10': 0.0133}
+2026-11-08 11:49:04,388 | INFO    | tuning |   item_knn   {'n_neighbors': 100, 'user_weighting': 'log', 'shrinkage': 100, 'history_window': 50} -> {'val_ndcg_at_10': 0.0194, 'val_recall_at_10': 0.0252, 'val_precision_at_10': 0.0098, 'val_coverage_at_10': 0.0142}
+2026-11-08 11:49:12,669 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'none', 'shrinkage': 10, 'history_window': None} -> {'val_ndcg_at_10': 0.011, 'val_recall_at_10': 0.0137, 'val_precision_at_10': 0.0062, 'val_coverage_at_10': 0.2208}
+2026-11-08 11:49:13,879 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'none', 'shrinkage': 10, 'history_window': 50} -> {'val_ndcg_at_10': 0.0101, 'val_recall_at_10': 0.0128, 'val_precision_at_10': 0.0056, 'val_coverage_at_10': 0.2272}
+2026-11-08 11:49:22,184 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'none', 'shrinkage': 100, 'history_window': None} -> {'val_ndcg_at_10': 0.0168, 'val_recall_at_10': 0.0215, 'val_precision_at_10': 0.0093, 'val_coverage_at_10': 0.0231}
+2026-11-08 11:49:23,452 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'none', 'shrinkage': 100, 'history_window': 50} -> {'val_ndcg_at_10': 0.0165, 'val_recall_at_10': 0.0213, 'val_precision_at_10': 0.0089, 'val_coverage_at_10': 0.0247}
+2026-11-08 11:49:31,941 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'log', 'shrinkage': 10, 'history_window': None} -> {'val_ndcg_at_10': 0.0171, 'val_recall_at_10': 0.022, 'val_precision_at_10': 0.0093, 'val_coverage_at_10': 0.0487}
+2026-11-08 11:49:33,188 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'log', 'shrinkage': 10, 'history_window': 50} -> {'val_ndcg_at_10': 0.0167, 'val_recall_at_10': 0.0216, 'val_precision_at_10': 0.009, 'val_coverage_at_10': 0.051}
+2026-11-08 11:49:41,557 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'log', 'shrinkage': 100, 'history_window': None} -> {'val_ndcg_at_10': 0.0198, 'val_recall_at_10': 0.0261, 'val_precision_at_10': 0.0099, 'val_coverage_at_10': 0.011}
+2026-11-08 11:49:42,697 | INFO    | tuning |   item_knn   {'n_neighbors': 300, 'user_weighting': 'log', 'shrinkage': 100, 'history_window': 50} -> {'val_ndcg_at_10': 0.0196, 'val_recall_at_10': 0.0259, 'val_precision_at_10': 0.0098, 'val_coverage_at_10': 0.0117}
+2026-11-08 11:49:52,407 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'none', 'shrinkage': 10, 'history_window': None} -> {'val_ndcg_at_10': 0.0109, 'val_recall_at_10': 0.0142, 'val_precision_at_10': 0.0062, 'val_coverage_at_10': 0.2062}
+2026-11-08 11:49:54,206 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'none', 'shrinkage': 10, 'history_window': 50} -> {'val_ndcg_at_10': 0.0102, 'val_recall_at_10': 0.0135, 'val_precision_at_10': 0.0056, 'val_coverage_at_10': 0.2115}
+2026-11-08 11:50:03,882 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'none', 'shrinkage': 100, 'history_window': None} -> {'val_ndcg_at_10': 0.0169, 'val_recall_at_10': 0.0221, 'val_precision_at_10': 0.0095, 'val_coverage_at_10': 0.0215}
+2026-11-08 11:50:05,675 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'none', 'shrinkage': 100, 'history_window': 50} -> {'val_ndcg_at_10': 0.0169, 'val_recall_at_10': 0.0225, 'val_precision_at_10': 0.0094, 'val_coverage_at_10': 0.0228}
+2026-11-08 11:50:15,888 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'log', 'shrinkage': 10, 'history_window': None} -> {'val_ndcg_at_10': 0.0171, 'val_recall_at_10': 0.022, 'val_precision_at_10': 0.0091, 'val_coverage_at_10': 0.0418}
+2026-11-08 11:50:17,738 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'log', 'shrinkage': 10, 'history_window': 50} -> {'val_ndcg_at_10': 0.0169, 'val_recall_at_10': 0.0219, 'val_precision_at_10': 0.0089, 'val_coverage_at_10': 0.0437}
+2026-11-08 11:50:27,600 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'log', 'shrinkage': 100, 'history_window': None} -> {'val_ndcg_at_10': 0.0194, 'val_recall_at_10': 0.0254, 'val_precision_at_10': 0.0098, 'val_coverage_at_10': 0.0102}
+2026-11-08 11:50:29,481 | INFO    | tuning |   item_knn   {'n_neighbors': 600, 'user_weighting': 'log', 'shrinkage': 100, 'history_window': 50} -> {'val_ndcg_at_10': 0.0193, 'val_recall_at_10': 0.0252, 'val_precision_at_10': 0.0098, 'val_coverage_at_10': 0.011}
+2026-11-08 11:50:33,625 | INFO    | tuning |   mf         {'n_factors': 16, 'reg': 0.05} -> {'val_rmse': 0.5815, 'val_mae': 0.3682}
+2026-11-08 11:50:37,606 | INFO    | tuning |   mf         {'n_factors': 16, 'reg': 0.1} -> {'val_rmse': 0.5794, 'val_mae': 0.3682}
+2026-11-08 11:50:41,535 | INFO    | tuning |   mf         {'n_factors': 16, 'reg': 0.2} -> {'val_rmse': 0.5783, 'val_mae': 0.3698}
+2026-11-08 11:50:48,764 | INFO    | tuning |   mf         {'n_factors': 32, 'reg': 0.05} -> {'val_rmse': 0.5827, 'val_mae': 0.3692}
+2026-11-08 11:50:56,117 | INFO    | tuning |   mf         {'n_factors': 32, 'reg': 0.1} -> {'val_rmse': 0.58, 'val_mae': 0.3689}
+2026-11-08 11:51:03,381 | INFO    | tuning |   mf         {'n_factors': 32, 'reg': 0.2} -> {'val_rmse': 0.5789, 'val_mae': 0.3706}
+2026-11-08 11:51:16,936 | INFO    | tuning |   mf         {'n_factors': 64, 'reg': 0.05} -> {'val_rmse': 0.5826, 'val_mae': 0.3706}
+2026-11-08 11:51:30,639 | INFO    | tuning |   mf         {'n_factors': 64, 'reg': 0.1} -> {'val_rmse': 0.5796, 'val_mae': 0.37}
+2026-11-08 11:51:44,804 | INFO    | tuning |   mf         {'n_factors': 64, 'reg': 0.2} -> {'val_rmse': 0.5785, 'val_mae': 0.3715}
+2026-11-08 11:51:54,178 | INFO    | tuning |   hybrid     {'w_knn': 0.6, 'w_content': 0.25, 'w_popularity': 0.15, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.02, 'val_recall_at_10': 0.026, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0096}
+2026-11-08 11:52:02,956 | INFO    | tuning |   hybrid     {'w_knn': 0.6, 'w_content': 0.25, 'w_popularity': 0.15, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0198, 'val_recall_at_10': 0.0254, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0054}
+2026-11-08 11:52:11,759 | INFO    | tuning |   hybrid     {'w_knn': 0.6, 'w_content': 0.25, 'w_popularity': 0.15, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0196, 'val_recall_at_10': 0.0253, 'val_precision_at_10': 0.0098, 'val_coverage_at_10': 0.0098}
+2026-11-08 11:52:20,571 | INFO    | tuning |   hybrid     {'w_knn': 0.6, 'w_content': 0.25, 'w_popularity': 0.15, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0196, 'val_recall_at_10': 0.0253, 'val_precision_at_10': 0.0098, 'val_coverage_at_10': 0.0058}
+2026-11-08 11:52:29,540 | INFO    | tuning |   hybrid     {'w_knn': 0.7, 'w_content': 0.1, 'w_popularity': 0.2, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0197, 'val_recall_at_10': 0.026, 'val_precision_at_10': 0.0099, 'val_coverage_at_10': 0.0081}
+2026-11-08 11:52:39,485 | INFO    | tuning |   hybrid     {'w_knn': 0.7, 'w_content': 0.1, 'w_popularity': 0.2, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0195, 'val_recall_at_10': 0.0251, 'val_precision_at_10': 0.0099, 'val_coverage_at_10': 0.0047}
+2026-11-08 11:52:48,407 | INFO    | tuning |   hybrid     {'w_knn': 0.7, 'w_content': 0.1, 'w_popularity': 0.2, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0197, 'val_recall_at_10': 0.0266, 'val_precision_at_10': 0.01, 'val_coverage_at_10': 0.0084}
+2026-11-08 11:52:57,616 | INFO    | tuning |   hybrid     {'w_knn': 0.7, 'w_content': 0.1, 'w_popularity': 0.2, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0197, 'val_recall_at_10': 0.0265, 'val_precision_at_10': 0.01, 'val_coverage_at_10': 0.0049}
+2026-11-08 11:53:06,410 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.1, 'w_popularity': 0.4, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.02, 'val_recall_at_10': 0.0264, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0051}
+2026-11-08 11:53:15,188 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.1, 'w_popularity': 0.4, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0198, 'val_recall_at_10': 0.0257, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.0031}
+2026-11-08 11:53:23,911 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.1, 'w_popularity': 0.4, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0198, 'val_recall_at_10': 0.0263, 'val_precision_at_10': 0.01, 'val_coverage_at_10': 0.0053}
+2026-11-08 11:53:32,762 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.1, 'w_popularity': 0.4, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0199, 'val_recall_at_10': 0.0265, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.0031}
+2026-11-08 11:53:41,507 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.0, 'w_popularity': 0.5, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0198, 'val_recall_at_10': 0.0265, 'val_precision_at_10': 0.01, 'val_coverage_at_10': 0.0042}
+2026-11-08 11:53:50,307 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.0, 'w_popularity': 0.5, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0194, 'val_recall_at_10': 0.0259, 'val_precision_at_10': 0.0099, 'val_coverage_at_10': 0.0025}
+2026-11-08 11:53:58,884 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.0, 'w_popularity': 0.5, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0199, 'val_recall_at_10': 0.0267, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.0042}
+2026-11-08 11:54:07,680 | INFO    | tuning |   hybrid     {'w_knn': 0.5, 'w_content': 0.0, 'w_popularity': 0.5, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0196, 'val_recall_at_10': 0.0264, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0026}
+2026-11-08 11:54:16,388 | INFO    | tuning |   hybrid     {'w_knn': 0.4, 'w_content': 0.0, 'w_popularity': 0.6, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0197, 'val_recall_at_10': 0.0263, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.0033}
+2026-11-08 11:54:25,096 | INFO    | tuning |   hybrid     {'w_knn': 0.4, 'w_content': 0.0, 'w_popularity': 0.6, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0195, 'val_recall_at_10': 0.0263, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.002}
+2026-11-08 11:54:34,165 | INFO    | tuning |   hybrid     {'w_knn': 0.4, 'w_content': 0.0, 'w_popularity': 0.6, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0197, 'val_recall_at_10': 0.0264, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0033}
+2026-11-08 11:54:42,919 | INFO    | tuning |   hybrid     {'w_knn': 0.4, 'w_content': 0.0, 'w_popularity': 0.6, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0196, 'val_recall_at_10': 0.0265, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0021}
+2026-11-08 11:54:51,649 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.1, 'w_popularity': 0.6, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.02, 'val_recall_at_10': 0.0264, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0028}
+2026-11-08 11:55:00,303 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.1, 'w_popularity': 0.6, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0199, 'val_recall_at_10': 0.0266, 'val_precision_at_10': 0.0103, 'val_coverage_at_10': 0.0017}
+2026-11-08 11:55:09,070 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.1, 'w_popularity': 0.6, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.02, 'val_recall_at_10': 0.0265, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.003}
+2026-11-08 11:55:17,982 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.1, 'w_popularity': 0.6, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0199, 'val_recall_at_10': 0.0265, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0019}
+2026-11-08 11:55:26,632 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.0, 'w_popularity': 0.7, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.02, 'val_recall_at_10': 0.0272, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.002}
+2026-11-08 11:55:35,414 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.0, 'w_popularity': 0.7, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0201, 'val_recall_at_10': 0.0277, 'val_precision_at_10': 0.0104, 'val_coverage_at_10': 0.0015}
+2026-11-08 11:55:44,241 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.0, 'w_popularity': 0.7, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0196, 'val_recall_at_10': 0.0263, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.0023}
+2026-11-08 11:55:53,185 | INFO    | tuning |   hybrid     {'w_knn': 0.3, 'w_content': 0.0, 'w_popularity': 0.7, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0197, 'val_recall_at_10': 0.0267, 'val_precision_at_10': 0.0103, 'val_coverage_at_10': 0.0017}
+2026-11-08 11:56:02,107 | INFO    | tuning |   hybrid     {'w_knn': 0.2, 'w_content': 0.1, 'w_popularity': 0.7, 'category_boost': 0.0, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.02, 'val_recall_at_10': 0.0263, 'val_precision_at_10': 0.0101, 'val_coverage_at_10': 0.0018}
+2026-11-08 11:56:11,083 | INFO    | tuning |   hybrid     {'w_knn': 0.2, 'w_content': 0.1, 'w_popularity': 0.7, 'category_boost': 0.0, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0201, 'val_recall_at_10': 0.0271, 'val_precision_at_10': 0.0103, 'val_coverage_at_10': 0.0016}
+2026-11-08 11:56:20,144 | INFO    | tuning |   hybrid     {'w_knn': 0.2, 'w_content': 0.1, 'w_popularity': 0.7, 'category_boost': 0.05, 'cold_user_threshold': 5, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0199, 'val_recall_at_10': 0.0259, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0021}
+2026-11-08 11:56:29,121 | INFO    | tuning |   hybrid     {'w_knn': 0.2, 'w_content': 0.1, 'w_popularity': 0.7, 'category_boost': 0.05, 'cold_user_threshold': 20, 'popularity_score': 'count'} -> {'val_ndcg_at_10': 0.0197, 'val_recall_at_10': 0.0264, 'val_precision_at_10': 0.0102, 'val_coverage_at_10': 0.0016}
+2026-11-08 11:56:29,140 | INFO    | tuning | Best params -> models/best_params.json
+2026-11-08 11:56:29,217 | INFO    | training | Training popularity ...
+2026-11-08 11:56:29,277 | INFO    | training |   popularity done in 0.0s (MLflow run 28d45d3402644b69aeb5d1ef8065d829)
+2026-11-08 11:56:29,325 | INFO    | training | Training item_knn ...
+2026-11-08 11:56:41,315 | INFO    | training |   item_knn done in 9.2s (MLflow run 98b94b974fd14653a95e4b762e6d1a5f)
+2026-11-08 11:56:41,365 | INFO    | training | Training content ...
+2026-11-08 11:56:42,520 | INFO    | training |   content done in 0.2s (MLflow run 36552bb5cc1b491ba210ee6b3b059818)
+2026-11-08 11:56:42,566 | INFO    | training | Training mf ...
+2026-11-08 11:56:47,375 | INFO    | training |   mf done in 4.6s (MLflow run 17dc881a85ed4b7484fee9d7fa99ea50)
+2026-11-08 11:56:47,422 | INFO    | training | Training hybrid ...
+2026-11-08 11:57:00,321 | INFO    | training |   hybrid done in 9.2s (MLflow run 83da732a24cc4e1fadb06db8dcc8f19e)
+2026-11-08 11:57:00,374 | INFO    | evaluation | Evaluating on 2235 users (11453 relevant test interactions), K=[5, 10]
+2026-11-08 11:57:01,847 | INFO    | evaluation |   popularity P@10=0.0068 R@10=0.0246 NDCG@10=0.0148 cov=0.001 div=0.913 RMSE=0.6289 MAE=0.4200
+2026-11-08 11:57:03,410 | INFO    | evaluation |   item_knn   P@10=0.0069 R@10=0.0238 NDCG@10=0.0164 cov=0.006 div=0.905
+2026-11-08 11:57:08,350 | INFO    | evaluation |   content    P@10=0.0006 R@10=0.0020 NDCG@10=0.0013 cov=0.103 div=0.649
+2026-11-08 11:57:09,665 | INFO    | evaluation |   mf         P@10=0.0001 R@10=0.0003 NDCG@10=0.0003 cov=0.004 div=0.957 RMSE=0.5861 MAE=0.3599
+2026-11-08 11:57:15,678 | INFO    | evaluation |   hybrid     P@10=0.0074 R@10=0.0251 NDCG@10=0.0160 cov=0.001 div=0.906
+2026-11-08 11:57:16,792 | INFO    | evaluation | Best model by NDCG@10: item_knn (0.0164)
+2026-11-08 11:57:33,930 | INFO    | backtest | [backtest_0] as_of=2014-02-26 users=155846 items=229944 interactions=1017931 vocab=8464
+2026-11-08 11:57:33,945 | INFO    | backtest | Fold 0: train < 2014-02-26 (525688 reviews, 16865 users x 39405 recipes), test to 2015-02-26: 1539 users
+2026-11-08 11:57:34,655 | INFO    | backtest |   popularity NDCG@10=0.0133
+2026-11-08 11:57:44,552 | INFO    | backtest |   item_knn   NDCG@10=0.0144
+2026-11-08 11:57:48,448 | INFO    | backtest |   content    NDCG@10=0.0009
+2026-11-08 11:57:53,907 | INFO    | backtest |   mf         NDCG@10=0.0003
+2026-11-08 11:58:07,097 | INFO    | backtest |   hybrid     NDCG@10=0.0145
+2026-11-08 11:58:25,514 | INFO    | backtest | [backtest_1] as_of=2015-02-26 users=166826 items=230710 interactions=1045734 vocab=8480
+2026-11-08 11:58:25,528 | INFO    | backtest | Fold 1: train < 2015-02-26 (537789 reviews, 17197 users x 40191 recipes), test to 2016-02-26: 850 users
+2026-11-08 11:58:25,761 | INFO    | backtest |   popularity NDCG@10=0.0127
+2026-11-08 11:58:35,782 | INFO    | backtest |   item_knn   NDCG@10=0.0146
+2026-11-08 11:58:37,755 | INFO    | backtest |   content    NDCG@10=0.0014
+2026-11-08 11:58:42,856 | INFO    | backtest |   mf         NDCG@10=0.0000
+2026-11-08 11:58:54,445 | INFO    | backtest |   hybrid     NDCG@10=0.0134
+2026-11-08 11:59:12,916 | INFO    | backtest | [backtest_2] as_of=2016-02-26 users=181218 items=230986 interactions=1067771 vocab=8489
+2026-11-08 11:59:12,930 | INFO    | backtest | Fold 2: train < 2016-02-26 (543104 reviews, 17357 users x 40485 recipes), test to 2017-02-25: 704 users
+2026-11-08 11:59:13,216 | INFO    | backtest |   popularity NDCG@10=0.0111
+2026-11-08 11:59:23,147 | INFO    | backtest |   item_knn   NDCG@10=0.0102
+2026-11-08 11:59:24,793 | INFO    | backtest |   content    NDCG@10=0.0010
+2026-11-08 11:59:29,830 | INFO    | backtest |   mf         NDCG@10=0.0004
+2026-11-08 11:59:41,350 | INFO    | backtest |   hybrid     NDCG@10=0.0105
+2026-11-08 12:00:01,089 | INFO    | backtest | [backtest_3] as_of=2017-02-25 users=194182 items=231227 interactions=1087489 vocab=8494
+2026-11-08 12:00:01,104 | INFO    | backtest | Fold 3: train < 2017-02-25 (547828 reviews, 17523 users x 40756 recipes), test to 2018-02-25: 587 users
+2026-11-08 12:00:01,400 | INFO    | backtest |   popularity NDCG@10=0.0114
+2026-11-08 12:00:11,585 | INFO    | backtest |   item_knn   NDCG@10=0.0120
+2026-11-08 12:00:13,035 | INFO    | backtest |   content    NDCG@10=0.0005
+2026-11-08 12:00:18,110 | INFO    | backtest |   mf         NDCG@10=0.0012
+2026-11-08 12:00:29,418 | INFO    | backtest |   hybrid     NDCG@10=0.0108

@@ -1,6 +1,6 @@
 """Stage 5 - Feature engineering and materialisation (custom offline feature store).
 
-The same `compute_features(..., as_of)` function produces two *views*:
+The same `materialize(view, ..., as_of)` code path (compute_user/item/interaction_features) produces two *views*:
 
 * training - as_of = split cutoff, built only from interactions before the cutoff
              (point-in-time correct, used for model training and evaluation)

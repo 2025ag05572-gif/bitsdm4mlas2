@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-11-08T05:50:17Z",
-  "pipeline_run_id": "9c9ea2d7-a99b-4700-be86-364d1e8db1ed",
+  "generated_at": "2026-11-08T06:27:16Z",
+  "pipeline_run_id": "26f2a5a2-f16d-4900-856b-08c583d1a3b2",
   "k_values": [
     5,
     10
@@ -30,7 +30,7 @@
       "novelty_at_10": 4.561377048492432,
       "rmse": 0.6288952087381674,
       "mae": 0.4200098632996318,
-      "fit_seconds": 0.03
+      "fit_seconds": 0.04
     },
     {
       "model": "item_knn",
@@ -52,7 +52,7 @@
       "novelty_at_10": 4.700940132141113,
       "rmse": NaN,
       "mae": NaN,
-      "fit_seconds": 9.19
+      "fit_seconds": 9.24
     },
     {
       "model": "content",
@@ -96,7 +96,7 @@
       "novelty_at_10": 11.101221084594727,
       "rmse": 0.586065426396473,
       "mae": 0.35985357353668285,
-      "fit_seconds": 4.81
+      "fit_seconds": 4.61
     },
     {
       "model": "hybrid",
@@ -118,7 +118,7 @@
       "novelty_at_10": 4.574896812438965,
       "rmse": NaN,
       "mae": NaN,
-      "fit_seconds": 9.2
+      "fit_seconds": 9.23
     }
   ],
   "rating_reference": {

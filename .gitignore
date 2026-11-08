@@ -3,7 +3,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .prefect/
-logs/
+/logs/
 mlflow.db
 mlruns/
 models/*.joblib
